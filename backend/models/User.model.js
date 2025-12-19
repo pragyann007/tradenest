@@ -14,9 +14,12 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
     },
-    otp:{
-        type:mongoose.Types.ObjectId,
-        ref:"Otp"
+  passwordResetToken:String,
+  passwordResetExpires:String,
+
+    is_verified:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true})
 

@@ -1,13 +1,15 @@
 import { User } from "../models/User.model.js";
+import { sendOtpMail } from "../service/sendMail.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import crypto from "crypto"
 
 
 export const register = asyncHandler(async(req,res)=>{
-
+console.log('hiiii')
     const {name,email,password} = req.body ; 
 
     if(!name || !email || !password){
@@ -80,3 +82,79 @@ export const login = asyncHandler(async(req,res)=>{
 
 
 })
+
+export const change_password_0 = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    console.log(email)
+  
+    if (!email) {
+      throw new ApiError(400, "Email is required");
+    }
+  
+    const user = await User.findOne({ email });
+  
+    // IMPORTANT: prevent email enumeration
+    if (!user) {
+      throw new ApiError(400,"No user found")
+    }
+  
+    // Generate secure random token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+  
+    // Hash token before saving
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+  
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 min
+    await user.save({ validateBeforeSave: false });
+  
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+  
+    await sendOtpMail(email, resetLink);
+  
+    return ApiResponse.success(
+      res,
+      {},
+     `mail sent to ${email}`
+    );
+  });
+
+
+  export const check_password_1 = asyncHandler(async (req, res) => {
+    const { token } = req.query;
+    const { password } = req.body;
+  
+    if (!token || !password) {
+      throw new ApiError(400, "Invalid request");
+    }
+  
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+  
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() }
+    });
+  
+    if (!user) {
+      throw new ApiError(400, "Token is invalid or expired");
+    }
+  
+    user.password = password; // will be hashed by pre-save hook
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+  
+    await user.save();
+  
+    return ApiResponse.success(
+      res,
+      {},
+      "Password reset successfully"
+    );
+  });
+  

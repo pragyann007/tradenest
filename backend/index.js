@@ -5,6 +5,7 @@ import cors from "cors"
 import { connect } from "./config/db.js"
 import { errorHandler } from "./middlewares/error.middlewares.js"
 import { authRouter } from "./routes/auth.route.js"
+import ApiError from "./utils/ApiError.js"
 
 const app = express()
 dotenv.config()
@@ -15,7 +16,7 @@ connect(process.env.MONGO_URI)
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser());
-app.use(cors);
+app.use(cors());
 
 // routing
 app.use("/api/v1/auth",authRouter)
@@ -24,8 +25,14 @@ app.use("/api/v1/auth",authRouter)
 
 
 
-app.use(errorHandler)
-app.listen(port,()=>{
+// after all routers
+app.use((req, res, next) => {
+    next(new ApiError(404, `Route ${req.originalUrl} not found`));
+  });
+  
+  // then your error handler
+  app.use(errorHandler);
+  app.listen(port,()=>{
     console.log(`Server running at port ${port}`)
 })
 
