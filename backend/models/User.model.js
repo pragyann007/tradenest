@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
     },
+    wallet:{
+        type:Number,
+        default:1000
+    },
   passwordResetToken:String,
   passwordResetExpires:String,
 

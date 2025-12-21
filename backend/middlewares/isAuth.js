@@ -1,4 +1,4 @@
-import ApiError from "../utils/ApiError";
+import ApiError from "../utils/ApiError.js";
 import jwt from "jsonwebtoken"
 
 export const isAuth = async (req,res,next)=>{

@@ -6,6 +6,8 @@ import { connect } from "./config/db.js"
 import { errorHandler } from "./middlewares/error.middlewares.js"
 import { authRouter } from "./routes/auth.route.js"
 import ApiError from "./utils/ApiError.js"
+import { candleRouter } from "./routes/candle.routes.js"
+import { userRouter } from "./routes/user.route.js"
 
 const app = express()
 dotenv.config()
@@ -20,6 +22,8 @@ app.use(cors());
 
 // routing
 app.use("/api/v1/auth",authRouter)
+app.use("/api/v1/candle",candleRouter)
+app.use("/api/v1/user",userRouter)
 
 
 
