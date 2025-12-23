@@ -1,6 +1,6 @@
 import { Asset } from "../models/Assets.model.js"
-import ApiError from "../utils/ApiError";
-import ApiResponse from "../utils/ApiResponse";
+import ApiError from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js"
 
 export const get_all_asset = asyncHandler(async(req,res)=>{
